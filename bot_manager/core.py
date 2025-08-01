@@ -21,7 +21,7 @@ class BotManager:
             print(f"Бот {bot_name} не найден")
             return
         
-        ProcessUtils.status_bot(bot.name, bot.bot_path)
+        ProcessUtils.status_bot(bot_name=bot.name, bot_path=bot.bot_path)
         
         started = ProcessUtils.start_bot(bot_name=bot.name, bot_path=bot.bot_path)
         if started:
@@ -37,3 +37,18 @@ class BotManager:
         
         ProcessUtils.stop_bot(bot.name, bot.bot_path)
         ProcessUtils.status_bot(bot.name, bot.bot_path)
+
+    def restart_bot(self, bot_name: str):
+        bot = self.bots.get(bot_name)
+        if not bot:
+            print(f"Бот {bot_name} не найден")
+            return
+        
+        ProcessUtils.start_bot(bot_name=bot.name, bot_path=bot.bot_path)
+
+        restarted = ProcessUtils.restart_bot(bot_name=bot.name, bot_path=bot.path)
+        if restarted:
+            print(f"[+] Бот {bot_name} успешно перезапущен")
+        else:
+            print(f"Не удалось перезапустить бота {bot.name}")
+
