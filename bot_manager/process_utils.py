@@ -1,6 +1,7 @@
 import os
 import psutil
 import time
+import subprocess
 
 class ProcessUtils:
 
@@ -41,6 +42,7 @@ class ProcessUtils:
 
         else:
             print(f"[!] Не найдена точка входа (main.py или bot.py) в {bot_path}")
+            return
 
         log_dir = "log"
         os.makedirs(log_dir, exist_ok=True)
@@ -97,5 +99,27 @@ class ProcessUtils:
 
         finally:
             ProcessUtils._remove_pid_file(bot_name, bot_path)
+
+    @staticmethod
+    def status_bot(bot_name: str, bot_path: str):
+        pid = ProcessUtils._get_pid(bot_name, bot_path)
+        if pid is None:
+            print(f"[•] Бот {bot_name}: не запущен (PID-файл не найден).")
+            return
+        
+        if psutil.pid_exists(pid):
+            proc = psutil.Process(pid)
+            print(f"[✓] Бот {bot_name} работает (PID {pid}, {proc.name()})")
+        else:
+            print(f"[•] Бот {bot_name}: не запущен.")
+            ProcessUtils._remove_pid_file(bot_name, bot_path)
+
+    @staticmethod
+    def restart_bot(bot_name: str, bot_path: str):
+        print(f"[↻] Перезапуск бота {bot_name}...")
+
+        ProcessUtils.stop_bot(bot_name, bot_path)
+        time.sleep(1)
+        ProcessUtils.start_bot(bot_name, bot_path)
 
     
