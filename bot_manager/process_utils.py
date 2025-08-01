@@ -31,7 +31,7 @@ class ProcessUtils:
 
 
     @staticmethod
-    def start_bot(bot_name: str, bot_path: str):
+    def start_bot(bot_name: str, bot_path: str) -> bool:
         venv_path = os.path.join(bot_path, "venv")
         python_bin = os.path.join(venv_path, "bin", "python")
 
@@ -39,28 +39,33 @@ class ProcessUtils:
             bot_file = os.path.join(bot_path, entry)
             if os.path.isfile(bot_file):
                 break
-
         else:
             print(f"[!] Не найдена точка входа (main.py или bot.py) в {bot_path}")
-            return
+            return False
 
         log_dir = "log"
         os.makedirs(log_dir, exist_ok=True)
         log_path = os.path.join(log_dir, f"{bot_name}.log")
 
-        with open(log_path, "a") as log_file:
-            process = subprocess.Popen(
-                [python_bin, bot_file],
-                stdout=log_file,
-                stderr=log_file,
-                stdin=subprocess.DEVNULL
-            )
+        try:
+            with open(log_path, "a") as log_file:
+                process = subprocess.Popen(
+                    [python_bin, bot_file],
+                    stdout=log_file,
+                    stderr=log_file,
+                    stdin=subprocess.DEVNULL
+                )
 
-            pid_file = os.path.join(bot_path, f"{bot_name}.pid")
-            with open(pid_file, "w") as f:
-                f.write(str(process.pid))
+                pid_file = os.path.join(bot_path, f"{bot_name}.pid")
+                with open(pid_file, "w") as f:
+                    f.write(str(process.pid))
 
-        print(f"[+] Бот {bot_name} запущен с PID {process.pid}")
+            print(f"[+] Бот {bot_name} запущен с PID {process.pid}")
+            return True
+        
+        except Exception as e:
+            print(f"[!] Ошибка при запуске бота {bot_name}: {e}")
+            return False
 
     @staticmethod
     def stop_bot(bot_name: str, bot_path: str, timeout: float = 5.0):
@@ -101,7 +106,7 @@ class ProcessUtils:
             ProcessUtils._remove_pid_file(bot_name, bot_path)
 
     @staticmethod
-    def status_bot(bot_name: str, bot_path: str):
+    def status_bot(bot_name: str, bot_path: str) -> bool:
         pid = ProcessUtils._get_pid(bot_name, bot_path)
         if pid is None:
             print(f"[•] Бот {bot_name}: не запущен (PID-файл не найден).")
@@ -110,6 +115,7 @@ class ProcessUtils:
         if psutil.pid_exists(pid):
             proc = psutil.Process(pid)
             print(f"[✓] Бот {bot_name} работает (PID {pid}, {proc.name()})")
+        
         else:
             print(f"[•] Бот {bot_name}: не запущен.")
             ProcessUtils._remove_pid_file(bot_name, bot_path)
@@ -122,4 +128,3 @@ class ProcessUtils:
         time.sleep(1)
         ProcessUtils.start_bot(bot_name, bot_path)
 
-    
