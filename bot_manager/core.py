@@ -44,11 +44,10 @@ class BotManager:
             print(f"Бот {bot_name} не найден")
             return
         
-        ProcessUtils.start_bot(bot_name=bot.name, bot_path=bot.bot_path)
-
-        restarted = ProcessUtils.restart_bot(bot_name=bot.name, bot_path=bot.path)
+        restarted = ProcessUtils.restart_bot(bot_name=bot.name, bot_path=bot.bot_path)
         if restarted:
             print(f"[+] Бот {bot_name} успешно перезапущен")
         else:
             print(f"Не удалось перезапустить бота {bot.name}")
 
+    
